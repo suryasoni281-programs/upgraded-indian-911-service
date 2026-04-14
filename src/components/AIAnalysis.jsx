@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Image as ImageIcon, Loader2, AlertTriangle, CheckCircle, Video } from 'lucide-react';
+import { Camera, Loader2, AlertTriangle, CheckCircle, Video } from 'lucide-react';
 import { backendSim } from '../mockData';
 
 export default function AIAnalysis({ onTriggerEmergency }) {
@@ -13,7 +13,6 @@ export default function AIAnalysis({ onTriggerEmergency }) {
 
   useEffect(() => {
     return () => {
-      // Cleanup stream when component unmounts
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
@@ -24,11 +23,10 @@ export default function AIAnalysis({ onTriggerEmergency }) {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode: 'environment' }, 
-        audio: true // Requesting both as requested
+        audio: true 
       });
       setStream(mediaStream);
       setHasPermission(true);
-      // Wait for ref to attach
       setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
@@ -79,30 +77,30 @@ export default function AIAnalysis({ onTriggerEmergency }) {
 
   return (
     <div className="container animate-fade-in flex-col w-full h-full">
-      <h2>AI Situation Analysis</h2>
-      <p>Quickly assess an emergency using your camera.</p>
+      <h2 className="m-0 text-3xl font-bold tracking-tight text-slate-800 mb-2">Scanner</h2>
+      <p className="text-slate-500 text-sm mb-6 max-w-sm">Use your optical sensor to securely analyze the situation.</p>
 
       {!hasPermission && !analyzing && !result && (
         <div className="flex-col items-center justify-center gap-4 mt-6 flex-1">
           <div 
-            className="w-full bg-slate-100 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center cursor-pointer p-8 hover:bg-slate-200 transition-colors"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer p-8 hover:bg-slate-100 transition-colors shadow-sm"
             onClick={requestCamera}
-            style={{ minHeight: '250px' }}
+            style={{ minHeight: '260px' }}
           >
-            <Video size={48} className="text-slate-400 mb-4" />
-            <span className="font-medium text-center text-slate-600">Start Live Camera</span>
-            <span className="text-xs text-center text-slate-400 mt-2">Will request Camera & Mic access</span>
+            <Video size={36} className="text-slate-700 mb-4" />
+            <span className="font-semibold text-center text-slate-800">Launch Optical Feed</span>
+            <span className="text-xs text-center text-slate-500 mt-2">Requires secure camera/mic access</span>
           </div>
           
-          <div className="text-xs text-center text-slate-400 mt-4 p-2 bg-slate-100 rounded">
-            <strong>Note:</strong> Set your Gemini API key in Profile to use real live AI image scanning instead of simulated data!
+          <div className="text-xs text-center text-slate-400 mt-4 p-3 bg-slate-50 border border-slate-100 rounded-lg">
+            <strong>Dev Note:</strong> Attach Gemini API token in Identity to enable actual AI feed inference.
           </div>
         </div>
       )}
 
       {hasPermission && !analyzing && !result && (
         <div className="flex-col items-center justify-center gap-4 mt-4 flex-1">
-          <div className="w-full bg-black rounded-lg overflow-hidden relative shadow-md" style={{ minHeight: '300px' }}>
+          <div className="w-full bg-slate-900 rounded-xl overflow-hidden relative shadow-sm border border-slate-200" style={{ minHeight: '340px' }}>
             <video 
               ref={videoRef} 
               autoPlay 
@@ -113,11 +111,10 @@ export default function AIAnalysis({ onTriggerEmergency }) {
             ></video>
           </div>
           <button 
-            className="btn btn-primary btn-universal mt-4 w-full"
+            className="w-full py-4 px-4 bg-slate-900 text-white font-semibold rounded-xl shadow-sm hover:bg-slate-800 transition-all flex items-center justify-center gap-2 mt-4"
             onClick={captureAndAnalyze}
-            style={{ padding: '1rem', borderRadius: '1rem' }}
           >
-            <Camera size={20} /> Capture & Analyze
+            <Camera size={20} /> Capture Target
           </button>
           
           <canvas ref={canvasRef} style={{ display: 'none' }} />
@@ -125,35 +122,35 @@ export default function AIAnalysis({ onTriggerEmergency }) {
       )}
 
       {analyzing && (
-        <div className="flex-col items-center justify-center gap-4 mt-10 flex-1 py-10 text-center">
-          <Loader2 size={48} className="animate-spin text-blue-500 mb-4 mx-auto" style={{ color: 'var(--color-police)' }} />
-          <h3 className="font-semibold">Analyzing Scene...</h3>
-          <p className="text-sm text-center max-w-xs">AI is detailing the scene using Multi-modal inference.</p>
+        <div className="flex-col items-center justify-center gap-4 mt-12 flex-1 py-10 text-center">
+          <Loader2 size={42} className="animate-spin text-slate-800 mb-4 mx-auto" />
+          <h3 className="font-bold text-slate-800 text-lg">Processing Telemetry...</h3>
+          <p className="text-sm text-slate-500 max-w-xs mx-auto">Multimodal inference engine running deep scan.</p>
         </div>
       )}
 
       {result && !analyzing && (
-        <div className="animate-slide-up mt-4 mb-8">
-          <div className="map-container mb-4 flex items-center justify-center bg-slate-800 rounded-lg overflow-hidden relative">
+        <div className="animate-fade-in mt-4 mb-8 flex-col w-full">
+          <div className="mb-6 flex items-center justify-center bg-slate-100 rounded-xl overflow-hidden relative border border-slate-200" style={{ minHeight: '220px' }}>
             {imageCaptured ? (
               <img src={imageCaptured} alt="Captured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
-              <div className="text-white text-opacity-50 text-sm">Image Data Unavailable</div>
+              <div className="text-slate-400 text-sm font-medium">Render Unavailable</div>
             )}
-            <div className={`absolute top-2 right-2 text-white text-xs px-2 py-1 rounded font-bold ${result.isEmergency ? 'bg-red-500' : 'bg-green-500'}`}>
-               {result.confidence}% Confident
+            <div className={`absolute top-3 right-3 text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-sm ${result.isEmergency ? 'bg-red-500' : 'bg-slate-800'}`}>
+               {result.confidence}% Match
             </div>
           </div>
           
-          <div className="rounded-lg p-4 mb-6" style={{ background: result.isEmergency ? 'var(--color-ambulance-bg)' : 'var(--color-success-bg)', borderColor: result.isEmergency ? 'var(--color-ambulance)' : 'var(--color-success)', borderStyle: 'solid', borderWidth: '1px' }}>
-            <div className="flex items-start gap-3">
-              {result.isEmergency ? <AlertTriangle size={24} color="var(--color-ambulance)" /> : <CheckCircle size={24} color="var(--color-success)" />}
+          <div className={`rounded-xl p-5 mb-6 border ${result.isEmergency ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'}`}>
+            <div className="flex items-start gap-4">
+              {result.isEmergency ? <AlertTriangle size={24} className="text-red-500" /> : <CheckCircle size={24} className="text-slate-800" />}
               <div>
-                <h3 className="font-bold" style={{ color: result.isEmergency ? 'var(--color-ambulance)' : 'var(--color-success)', marginBottom: '0.25rem' }}>
-                  {result.isEmergency ? `Emergency: ${result.detected}` : `Status: Appears Safe`}
+                <h3 className={`font-bold text-lg mb-1 ${result.isEmergency ? 'text-red-700' : 'text-slate-800'}`}>
+                  {result.isEmergency ? `Alert: ${result.detected}` : `Clear: Nominal Setup`}
                 </h3>
-                <p className="text-sm m-0" style={{ color: 'var(--text-secondary)' }}>
-                  {result.isEmergency ? `System confirms visual signs of an emergency. ${result.advice}` : `AI detected: ${result.detected}. ${result.advice}`}
+                <p className="text-sm font-medium text-slate-600 leading-relaxed m-0">
+                  {result.isEmergency ? `Visual flags confirmed. ${result.advice}` : `Inference found: ${result.detected}. ${result.advice}`}
                 </p>
               </div>
             </div>
@@ -161,19 +158,18 @@ export default function AIAnalysis({ onTriggerEmergency }) {
 
           {result.isEmergency && (
             <button 
-              className="btn btn-danger btn-universal w-full mb-3 shadow-universal"
+              className="w-full py-4 px-4 bg-red-600 text-white font-bold rounded-xl shadow-sm hover:bg-red-700 transition-colors mb-4 border border-red-700"
               onClick={() => onTriggerEmergency(result.service)}
-              style={{ padding: '1rem' }}
             >
-              {result.advice} Now
+              {result.advice} (Dispatch Unit)
             </button>
           )}
           
           <button 
-            className="btn btn-secondary w-full border"
+            className="w-full py-4 px-4 bg-white text-slate-700 border border-slate-300 font-semibold rounded-xl shadow-sm hover:bg-slate-50 transition-colors flex justify-center"
             onClick={handleRecapture}
           >
-            {result.isEmergency ? "Recapture Stream" : "Scan Again"}
+            {result.isEmergency ? "Void Sensor Data" : "New Scan"}
           </button>
         </div>
       )}
